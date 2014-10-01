@@ -1,0 +1,10 @@
+name: PrisonGangs
+main: com.pwncraftpvp.prisongangs.core.Main
+description: Gangs for prison!
+author: JjPwN1
+version: 1.0
+commands:
+   gang:
+      description: Gangs main command
+   g:
+      description: Gangs main command
