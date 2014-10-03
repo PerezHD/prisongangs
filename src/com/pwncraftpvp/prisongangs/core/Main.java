@@ -14,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.pwncraftpvp.prisongangs.gang.Gang;
 import com.pwncraftpvp.prisongangs.gang.Rank;
 import com.pwncraftpvp.prisongangs.utils.Utils;
+import com.pwncraftpvp.prisongangs.utils.Warzone;
 
 public class Main extends JavaPlugin{
 	
@@ -38,6 +39,7 @@ public class Main extends JavaPlugin{
 		instance = this;
 		this.getServer().getPluginManager().registerEvents(new Events(), this);
 		if(this.getConfig().getBoolean("doNotChangeMe") == false){
+			this.getConfig().set("chatFormat", "%g");
 			this.getConfig().set("doNotChangeMe", true);
 			this.saveConfig();
 		}
@@ -275,8 +277,12 @@ public class Main extends JavaPlugin{
 								Gang gang = Utils.getGangByName(name);
 								pplayer.sendGangInformation(gang);
 							}else if(new PPlayer(name).getFile().exists() == true){
-								Gang gang = new PPlayer(name).getGang();
-								pplayer.sendGangInformation(gang);
+								PPlayer fplayer = new PPlayer(name);
+								if(fplayer.hasGang() == true){
+									pplayer.sendGangInformation(fplayer.getGang());
+								}else{
+									pplayer.sendError("That gang does not exist!");
+								}
 							}else{
 								pplayer.sendError("That gang does not exist!");
 							}
@@ -306,7 +312,7 @@ public class Main extends JavaPlugin{
 											}else if(usePlayer == true){
 												gang = new PPlayer(name).getGang();
 											}
-											if(!pplayer.getGang().getAllies().contains(gang.getID())){
+											if(!pplayer.getGang().isAlly(gang.getID())){
 												if(!allyInvited.containsKey(gang.getID())){
 													allyInvited.put(gang.getID(), pplayer.getGang().getID());
 													gang.broadcastModMessage("You have been invited to ally " + yellow + pplayer.getGang().getName() + gray + "!");
@@ -371,7 +377,7 @@ public class Main extends JavaPlugin{
 										}else if(usePlayer == true){
 											gang = new PPlayer(name).getGang();
 										}
-										if(pplayer.getGang().getAllies().contains(gang.getID()) && gang.getAllies().contains(pplayer.getGang().getID())){
+										if(pplayer.getGang().isAlly(gang.getID()) == true && gang.isAlly(pplayer.getGang().getID()) == true){
 											pplayer.getGang().removeAlly(gang.getID());
 											gang.removeAlly(pplayer.getGang().getID());
 											pplayer.getGang().broadcastMessage("Your gang is no longer allied to " + yellow + gang.getName() + gray + "!");
@@ -454,41 +460,57 @@ public class Main extends JavaPlugin{
 						}else{
 							pplayer.sendError("Usage: /" + cmd.getName() + " kick <player>");
 						}
-					}else if(args[0].equalsIgnoreCase("list")){
-						List<Gang> gangs = Utils.getGangs();
-						int page = 1;
-						int gangsPerPage = 9;
-						double totalpages = (Utils.roundUp(gangs.size(), gangsPerPage)) / gangsPerPage;
-						if(args.length == 1){
-							pplayer.sendMessageHeader("Gang List - Page " + page + "/" + (int)totalpages);
-							int gangsDisplayed = 0;
-							for(Gang g : gangs){
-								gangsDisplayed++;
-								if(gangsDisplayed <= (page*gangsPerPage) && gangsDisplayed > ((page*gangsPerPage) - gangsPerPage)){
-									pplayer.sendMessage(g.getName());
-								}else{
-									break;
-								}
-							}
-						}else if(args.length == 2){
-							if(Utils.isInteger(args[1]) == true){
-								page = Integer.parseInt(args[1]);
-								if(page > totalpages){
-									page = (int) totalpages;
-								}
-								pplayer.sendMessageHeader("Gang List - Page " + page + "/" + (int)totalpages);
-								int gangsDisplayed = 0;
-								for(Gang g : gangs){
-									gangsDisplayed++;
-									if(gangsDisplayed <= (page*gangsPerPage) && gangsDisplayed > ((page*gangsPerPage) - gangsPerPage)){
-										pplayer.sendMessage(g.getName());
+					}else if(args[0].equalsIgnoreCase("warzone")){
+						if(player.isOp() == true){
+							if(args.length == 2){
+								if(args[1].equalsIgnoreCase("claim")){
+									if(Warzone.check(player.getLocation()) == false){
+										Warzone.claim(player.getLocation());
+										pplayer.sendMessage("You have claimed warzone at your current location!");
 									}else{
-										break;
+										pplayer.sendError("This is already a warzone!");
 									}
+								}else if(args[1].equalsIgnoreCase("unclaim")){
+									if(Warzone.check(player.getLocation()) == true){
+										Warzone.unclaim(player.getLocation());
+										pplayer.sendMessage("You have unclaimed warzone at your current location!");
+									}else{
+										pplayer.sendError("This is not a warzone!");
+									}
+								}else if(args[1].equalsIgnoreCase("check")){
+									if(Warzone.check(player.getLocation()) == true){
+										pplayer.sendMessage("This is a warzone!");
+									}else{
+										pplayer.sendMessage("This is not a warzone!");
+									}
+								}else{
+									pplayer.sendError("Usage: /" + cmd.getName() + " warzone <claim/unclaim>");
 								}
 							}else{
-								pplayer.sendError("Usage: /" + cmd.getName() + " list <page>");
+								pplayer.sendError("Usage: /" + cmd.getName() + " warzone <claim/unclaim>");
 							}
+						}else{
+							pplayer.sendError("You do not have enough permission to do this!");
+						}
+					}else if(args[0].equalsIgnoreCase("setformat")){
+						if(player.isOp() == true){
+							if(args.length >= 2){
+								String format = "";
+								for(int x = 1; x <= (args.length - 1); x++){
+									if(x != (args.length - 1)){
+										format = format + args[x] + " ";
+									}else if(x == (args.length - 1)){
+										format = format + args[x];
+									}
+								}
+								format = format.replaceAll("&", "§");
+								Utils.setChatFormat(format);
+								pplayer.sendMessage("You have set the chat format to: " + format);
+							}else{
+								pplayer.sendError("Usage: /" + cmd.getName() + " setformat <chat format>");
+							}
+						}else{
+							pplayer.sendError("You do not have enough permission to do this!");
 						}
 					}else if(args[0].equalsIgnoreCase("help") || args[0].equalsIgnoreCase("h")){
 						if(args.length == 1){

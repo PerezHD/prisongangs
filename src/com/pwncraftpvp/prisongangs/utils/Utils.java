@@ -84,9 +84,11 @@ public class Utils {
 	public static boolean doesGangExist(String name){
 		boolean exists = false;
 		for(int x = 1; x <= getTotalGangs(); x++){
-			if(main.getConfig().getString("gangs." + x + ".name").equalsIgnoreCase(name)){
-				exists = true;
-				break;
+			if(main.getConfig().getString("gangs." + x + ".name") != null){
+				if(main.getConfig().getString("gangs." + x + ".name").equalsIgnoreCase(name)){
+					exists = true;
+					break;
+				}
 			}
 		}
 		return exists;
@@ -153,6 +155,23 @@ public class Utils {
 		}
 		gang.getFile().delete();
 		main.getConfig().set("gangs." + gangID + ".name", null);
+		main.saveConfig();
+	}
+	
+	/**
+	 * Get the chat format for gangs
+	 * @return The chat format
+	 */
+	public static String getChatFormat(){
+		return main.getConfig().getString("chatFormat");
+	}
+	
+	/**
+	 * Set the chat format for gangs
+	 * @param format - The chat format
+	 */
+	public static void setChatFormat(String format){
+		main.getConfig().set("chatFormat", format);
 		main.saveConfig();
 	}
 }

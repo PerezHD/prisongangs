@@ -1,15 +1,17 @@
 package com.pwncraftpvp.prisongangs.core;
 
-import net.md_5.bungee.api.ChatColor;
-
 import org.apache.commons.lang.WordUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import com.pwncraftpvp.prisongangs.utils.UTFUtils;
+import com.pwncraftpvp.prisongangs.utils.Utils;
+import com.pwncraftpvp.prisongangs.utils.Warzone;
 
 public class Events implements Listener{
 	
@@ -23,11 +25,12 @@ public class Events implements Listener{
 		PPlayer pplayer = new PPlayer(player);
 		if(!main.gangChat.contains(player.getName()) && !main.allyChat.contains(player.getName())){
 			if(pplayer.hasGang() == true){
-				event.getMessage().replaceAll("\\{GANG\\}", pplayer.getGang().getName());
-				event.getMessage().replaceAll("\\{gang\\}", pplayer.getGang().getName());
+				String f = event.getFormat().replaceAll("\\{GANG\\}", Utils.getChatFormat().replaceAll("%g", pplayer.getGang().getName()) + " ")
+						.replaceAll("\\{gang\\}", Utils.getChatFormat().replaceAll("%g", pplayer.getGang().getName()) + " ");
+				event.setFormat(f);
 			}else{
-				event.getMessage().replaceAll("\\{GANG\\}", "");
-				event.getMessage().replaceAll("\\{gang\\}", "");
+				String f = event.getFormat().replaceAll("\\{GANG\\}", "").replaceAll("\\{gang\\}", "");
+				event.setFormat(f);
 			}
 		}else{
 			event.setCancelled(true);
@@ -50,6 +53,23 @@ public class Events implements Listener{
 				PPlayer pkiller = new PPlayer(killer);
 				pplayer.setDeaths(pplayer.getDeaths() + 1);
 				pkiller.setKills(pkiller.getKills() + 1);
+			}
+		}
+	}
+	
+	@EventHandler
+	public void entityDamageByEntity(EntityDamageByEntityEvent event){
+		if(event.getEntity() instanceof Player && event.getDamager() instanceof Player){
+			Player player = (Player) event.getEntity();
+			PPlayer pplayer = new PPlayer(player);
+			Player damager = (Player) event.getDamager();
+			PPlayer pdamager = new PPlayer(damager);
+			if(Warzone.check(player.getLocation()) == false){
+				if(pplayer.hasGang() == true){
+					if(pplayer.getGang().getID() == pdamager.getGang().getID() || pplayer.getGang().isAlly(pdamager.getGang().getID()) == true){
+						event.setCancelled(true);
+					}
+				}
 			}
 		}
 	}

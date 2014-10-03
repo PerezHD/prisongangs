@@ -104,6 +104,7 @@ public class Gang {
 		List<String> members = this.getConfig().getStringList("members");
 		members.remove(player);
 		this.setConfigValue("members", members);
+		this.setConfigValue("ranks." + player, null);
 		PPlayer pplayer = new PPlayer(player);
 		pplayer.setGangID(0);
 	}
@@ -162,6 +163,22 @@ public class Gang {
 	}
 	
 	/**
+	 * Get the position of the ally's gang id in the list
+	 * @param gangID - The ally's gang id
+	 * @return The position in the list
+	 */
+	public int getAllyPositionInList(int gangID){
+		int pos = 0;
+		for(int x = 0; x <= (this.getAllies().size() - 1); x++){
+			if(this.getAllies().get(x) == gangID){
+				pos = x;
+				break;
+			}
+		}
+		return pos;
+	}
+	
+	/**
 	 * Add an ally to the gang
 	 * @param player - The name of the gang to add as an ally
 	 */
@@ -172,13 +189,22 @@ public class Gang {
 	}
 	
 	/**
-	 * Remove an ally to the gang
+	 * Remove an ally from the gang
 	 * @param player - The name of the gang to remove as an ally
 	 */
 	public void removeAlly(int gangID){
 		List<Integer> allies = this.getConfig().getIntegerList("allies");
-		allies.remove(gangID);
+		allies.remove(this.getAllyPositionInList(gangID));
 		this.setConfigValue("allies", allies);
+	}
+	
+	/**
+	 * Check if another gang is an ally
+	 * @param gangID - The gang to check
+	 * @return True or false depending on if the gang is an ally or not
+	 */
+	public boolean isAlly(int gangID){
+		return this.getAllies().contains(gangID);
 	}
 	
 	/**
