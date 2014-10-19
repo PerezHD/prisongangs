@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import com.pwncraftpvp.prisongangs.utils.UTFUtils;
 import com.pwncraftpvp.prisongangs.utils.Utils;
@@ -53,6 +54,19 @@ public class Events implements Listener{
 				PPlayer pkiller = new PPlayer(killer);
 				pplayer.setDeaths(pplayer.getDeaths() + 1);
 				pkiller.setKills(pkiller.getKills() + 1);
+			}
+		}
+	}
+	
+	@EventHandler
+	public void playerMove(PlayerMoveEvent event){
+		Player player = event.getPlayer();
+		PPlayer pplayer = new PPlayer(player);
+		if(main.teleporting.containsKey(player.getName())){
+			if(event.getTo().getBlockX() != event.getFrom().getBlockX() || event.getTo().getBlockZ() != event.getFrom().getBlockZ()){
+				main.teleporting.get(player.getName()).cancel();
+				main.teleporting.remove(player.getName());
+				pplayer.sendError("You moved while teleporting!");
 			}
 		}
 	}

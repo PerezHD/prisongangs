@@ -116,6 +116,11 @@ public class PPlayer {
 			this.sendMessage(yellow + "/" + cmd.getName() + " disband " + gray + "- Disband your gang!");
 			this.sendMessage(yellow + "/" + cmd.getName() + " rename <name> " + gray + "- Rename your gang!");
 			this.sendMessage(yellow + "/" + cmd.getName() + " kick <player> " + gray + "- Kick a member!");
+			player.sendMessage(" ");
+			this.sendMessage("Type " + yellow + "/" + cmd.getName() + " help " + (page + 1) + gray + " for more commands!");
+		}else if(page == 3){
+			this.sendMessage(yellow + "/" + cmd.getName() + " home " + gray + "- Teleport to the home of your gang!");
+			this.sendMessage(yellow + "/" + cmd.getName() + " sethome " + gray + "- Set the home of your gang!");
 			if(player.isOp() == true){
 				this.sendMessage(yellow + "/" + cmd.getName() + " warzone <claim/unclaim> " + gray + "- Create a warzone!");
 				this.sendMessage(yellow + "/" + cmd.getName() + " setformat <chat format> " + gray + "- Set the chat format!");

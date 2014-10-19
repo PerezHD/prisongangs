@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -73,6 +75,43 @@ public class Gang {
 	public void setName(String name){
 		this.getFile().renameTo(new File(main.getDataFolder() + File.separator + "gangs", name + ".yml"));
 		main.getConfig().set("gangs." + id + ".name", name);
+		main.saveConfig();
+	}
+	
+	/**
+	 * Get the gang's home location
+	 * @return The gang's home location
+	 */
+	public Location getHome(){
+		double x,y,z;
+		x = main.getConfig().getDouble("gangs." + this.getName() + ".hideout.x");
+		y = main.getConfig().getDouble("gangs." + this.getName() + ".hideout.y");
+		z = main.getConfig().getDouble("gangs." + this.getName() + ".hideout.z");
+		int yaw,pitch;
+		yaw = main.getConfig().getInt("gangs." + this.getName() + ".hideout.yaw");
+		pitch = main.getConfig().getInt("gangs." + this.getName() + ".hideout.pitch");
+		World world = null;
+		if(main.getConfig().getString("gangs." + this.getName() + ".hideout.world") != null){
+			world = Bukkit.getWorld(main.getConfig().getString("gangs." + this.getName() + ".hideout.world"));
+		}
+		if((x > 5 || y > 5 || z > 5 || yaw > 5 || pitch > 5) && (world != null)){
+			return new Location(world, x, y, z, yaw, pitch);
+		}else{
+			return null;
+		}
+	}
+	
+	/**
+	 * Set the gang's home location
+	 * @param loc - The location to set the gang's home to
+	 */
+	public void setHome(Location loc){
+		main.getConfig().set("gangs." + this.getName() + ".hideout.x", loc.getX());
+		main.getConfig().set("gangs." + this.getName() + ".hideout.y", loc.getY());
+		main.getConfig().set("gangs." + this.getName() + ".hideout.z", loc.getZ());
+		main.getConfig().set("gangs." + this.getName() + ".hideout.yaw", loc.getYaw());
+		main.getConfig().set("gangs." + this.getName() + ".hideout.pitch", loc.getPitch());
+		main.getConfig().set("gangs." + this.getName() + ".hideout.world", loc.getWorld().getName());
 		main.saveConfig();
 	}
 	

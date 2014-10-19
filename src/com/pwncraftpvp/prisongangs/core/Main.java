@@ -13,6 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.pwncraftpvp.prisongangs.gang.Gang;
 import com.pwncraftpvp.prisongangs.gang.Rank;
+import com.pwncraftpvp.prisongangs.tasks.TeleportTask;
 import com.pwncraftpvp.prisongangs.utils.Utils;
 import com.pwncraftpvp.prisongangs.utils.Warzone;
 
@@ -26,6 +27,7 @@ public class Main extends JavaPlugin{
 	public List<String> allyChat = new ArrayList<String>();
 	public HashMap<String, Gang> invited = new HashMap<String, Gang>();
 	public HashMap<Integer, Integer> allyInvited = new HashMap<Integer, Integer>();
+	public HashMap<String, TeleportTask> teleporting = new HashMap<String, TeleportTask>();
 	
 	/**
 	 * Get the instance of this class
@@ -59,8 +61,12 @@ public class Main extends JavaPlugin{
 								String name = args[1];
 								if(Utils.doesGangExist(name) == false){
 									if(name.length() <= 16 && name.length() >= 4){
-										Utils.createGang(player.getName(), name);
-										pplayer.sendMessage("You have created a new gang named " + yellow + name + gray + "!");
+										if(Utils.containsSymbols(name) == false){
+											Utils.createGang(player.getName(), name);
+											pplayer.sendMessage("You have created a new gang named " + yellow + name + gray + "!");
+										}else{
+											pplayer.sendError("The gang name must not have symbols in it!");
+										}
 									}else{
 										pplayer.sendError("The gang name must be 4-16 characters long!");
 									}
@@ -404,8 +410,12 @@ public class Main extends JavaPlugin{
 									String name = args[1];
 									if(Utils.doesGangExist(name) == false){
 										if(name.length() <= 16 && name.length() >= 4){
-											pplayer.getGang().setName(name);
-											pplayer.sendMessage("You have renamed the gang to " + yellow + name + gray + "!");
+											if(Utils.containsSymbols(name) == false){
+												pplayer.getGang().setName(name);
+												pplayer.sendMessage("You have renamed the gang to " + yellow + name + gray + "!");
+											}else{
+												pplayer.sendError("The gang name must not have symbols in it!");
+											}
 										}else{
 											pplayer.sendError("The gang name must be 4-16 characters long!");
 										}
@@ -512,16 +522,48 @@ public class Main extends JavaPlugin{
 						}else{
 							pplayer.sendError("You do not have enough permission to do this!");
 						}
+					}else if(args[0].equalsIgnoreCase("sethome")){
+						if(player.hasPermission("prisongangs.sethome")){
+							if(pplayer.hasGang() == true){
+								if(pplayer.getGangRank() == Rank.LEADER || pplayer.getGangRank() == Rank.MOD){
+									pplayer.getGang().setHome(player.getLocation());
+									pplayer.sendMessage("You have set your gang's home!");
+								}else{
+									pplayer.sendError("You are not a moderator, therefore you may not do this!");
+								}
+							}else{
+								pplayer.sendError("You do not have a gang!");
+							}
+						}else{
+							pplayer.sendError("You do not have enough permission to do this!");
+						}
+					}else if(args[0].equalsIgnoreCase("home")){
+						if(player.hasPermission("prisongangs.home")){
+							if(pplayer.hasGang() == true){
+								if(pplayer.getGang().getHome() != null){
+									TeleportTask task = new TeleportTask(player, pplayer.getGang().getHome());
+									task.runTaskTimer(this, 0, 20);
+									teleporting.put(player.getName(), task);
+									pplayer.sendMessage("You are teleporting to your gang home. Stand still.");
+								}else{
+									pplayer.sendError("Your gang does not have a home!");
+								}
+							}else{
+								pplayer.sendError("You do not have a gang!");
+							}
+						}else{
+							pplayer.sendError("You do not have enough permission to do this!");
+						}
 					}else if(args[0].equalsIgnoreCase("help") || args[0].equalsIgnoreCase("h")){
 						if(args.length == 1){
 							pplayer.sendCommandHelp(1, cmd);
 						}else if(args.length == 2){
 							if(Utils.isInteger(args[1]) == true){
 								int page = Integer.parseInt(args[1]);
-								if(page <= 2){
+								if(page <= 3){
 									pplayer.sendCommandHelp(page, cmd);
 								}else{
-									pplayer.sendCommandHelp(2, cmd);
+									pplayer.sendCommandHelp(3, cmd);
 								}
 							}else{
 								pplayer.sendError("Usage: /" + cmd.getName() + " help <page>");

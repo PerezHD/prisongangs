@@ -45,6 +45,22 @@ public class Utils {
 	}
 	
 	/**
+	 * Check if a string contains symbols
+	 * @param name - The string to check
+	 * @return True or false depending on if the string has symbols or not
+	 */
+	public static boolean containsSymbols(String name){
+		boolean symbols = false;
+		if(name.contains("!") || name.contains("@") || name.contains("#") || name.contains("$") || name.contains("%") || name.contains("^") || name.contains("*") ||
+				name.contains("(") || name.contains(")") || name.contains("+") || name.contains("-") || name.contains("?") || name.contains("<") ||
+				name.contains(">") || name.contains("|") || name.contains("[") || name.contains("]") || name.contains("{") || name.contains("}") ||
+				name.contains("/") || name.contains(":") || name.contains(";") || name.contains("\"") || name.contains("\\") || name.contains("'") || name.contains("&")){
+			symbols = true;
+		}
+		return symbols;
+	}
+	
+	/**
 	 * Get the total amount of gangs created, not taking into account deleted gangs
 	 * @return The total amount of gangs created
 	 */
